@@ -2,7 +2,7 @@ package main
 
 import (
   "fmt"
-  "strings"
+  //"strings"
   "github.com/bitfinexcom/bitfinex-api-go/v1"
 )
 
@@ -37,7 +37,7 @@ func sell(currency string, amount float32, price float32, client *bitfinex.Clien
 
 }
 
-func sellMarketOrder(currency string, amount float32, client *bitfinex.Client) {
+func sellMarketOrder(currency string, amount float32, price float32 client *bitfinex.Client) {
   var typeOfCoinToSell string = currency + "usd"
   var negAmount float32 = amount * -1
 

@@ -3,11 +3,12 @@ package main
 import (
   "bytes"
   "encoding/json"
-  "fmt"
+  //"fmt"
   "io/ioutil"
   "net/http"
-  "time"
-  "strconv"
+  //"time"
+  //"strconv"
+  "github.com/bitfinexcom/bitfinex-api-go/v1"
   )
 /*
 - make sure it sold                                                             --Done
@@ -51,7 +52,7 @@ func checkAmount(currency string, amount float32) bool {                        
   }
 
   data := bytes.TrimSpace(body)
-  data := bytes.TrimPrefix(data, []byte("// "))
+  data = bytes.TrimPrefix(data, []byte("// "))
   err = json.Unmarshal(data & orderDetails)
   if err != nil {
     fmt.Println(err)
@@ -66,9 +67,7 @@ func checkAmount(currency string, amount float32) bool {                        
 
   if amount >= minAmount && amount <= maxAmount {
     return true
-  }
-
-  else if minAmount == 0 && maxAmount == 0 {
+  } else if minAmount == 0 && maxAmount == 0 {
     return false
   }
 

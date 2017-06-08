@@ -3,6 +3,7 @@ package main
 import (
   "fmt"
   "time"
+  "github.com/bitfinexcom/bitfinex-api-go/v1"
 )
 
 func basicTrade(currency string, array [100]float32, client *bitfinex.Client, buyingPrices *[100]float32) {
@@ -20,7 +21,7 @@ func basicTrade(currency string, array [100]float32, client *bitfinex.Client, bu
   for i := 0; i < numberOfPointsToLookAt; i++ {
     lastPoint = array[numberOfPointsToLookAt-i]                                 //this should go from 36 -> 0
     actualPercentDifference = (lastPoint - nowPoint)/nowPoint                         //calculates percent difference between the points
-    neededPercent = orignialPercent + (percentageChange * i)                    //the needed pecent change to buy or sell, increases with i
+    neededPercent = orignialPercent + (percentageChange * float32(i))                    //the needed pecent change to buy or sell, increases with i
 
     /*
     real quick this calculates the percent difference and as it gets closer to the current time
@@ -31,14 +32,14 @@ func basicTrade(currency string, array [100]float32, client *bitfinex.Client, bu
       var priceToBuy float32 = priceToBuy(currency)
       var amountToBuy float32 = amountToBuy()
       var buyOrderSuccessful bool
-      if shouldBuy(currency) { // write this <---
+      if shouldBuy() { // write this <---
         if checkAmount(currency, amountToBuy) {                                   //if within limits of min and max amount that can be bought and should
           if getWalletAmount("usd", client) > amountToBuy {                       //check theres enough in wallet
             tradeID = buy(currency, amountToBuy, priceToBuy, client)                      //buy
             fmt.Println("Attempting to buy")
             for j := 0; j < 6; j++ {                                              //try 6 times at 10 second intervals to buy
               time.Sleep(10 * time.Second)
-              if orderStatus(tradeID, client) {
+              if orderStatus(tradeID, client) == true {
                 fmt.Println("Buy order went through successfully")
                 actualBuyPrice = checkBuyPrice(tradeID, client)
                 for k := 0; k < len(buyingPrices); k++ {
@@ -50,29 +51,25 @@ func basicTrade(currency string, array [100]float32, client *bitfinex.Client, bu
                 buyOrderSuccessful = true
                 j = 10
                 fmt.Println("You have bought",amountToBuy,currency,"at",priceToBuy,"for",amountToBuy*priceToBuy)
-                break
-              }
-              else {
-                fmt.Println("Buy order has not completed, retrying", 6-i,"more times")
-                buyOrderSuccessful = false
+              } else {
+                  fmt.Println("Buy order has not completed, retrying", 6-i,"more times")
+                  buyOrderSuccessful = false
               }
             }
             if !buyOrderSuccessful {
               fmt.Println("Order has failed to go through completely, sorry")
-              cancelOrder(orderID, client)
+              cancelOrder(tradeID, client)
             }
-          }
-          else {
+          } else {
             fmt.Println("Not enough in wallet to buy with")
           }
-        }
-        else {
+        } else {
           fmt.Println("Ordersize to big or to small to buy with")
         }
+      } else {
+        fmt.Println("You shouldnt buy at this time")
       }
-    }
-
-    else if actualPercentDifference <= (neededPercent*-1) {                     //sell if negative percent meets requirements
+    } else if actualPercentDifference <= (neededPercent*-1) {                     //sell if negative percent meets requirements
       var priceToSell float32 = priceToSell(buyingPrices)
       var amountToSell float32 = amountToSell(currency, client)
       var sellOrderSuccessful bool
@@ -92,25 +89,22 @@ func basicTrade(currency string, array [100]float32, client *bitfinex.Client, bu
                 j = 10
                 fmt.Println("You have sold", amountToSell,currency,"at",priceToSell,"for",amountToSell*priceToSell)
                 break
-              }
-              else {
+              } else {
                 fmt.Println("Sell order has not been completed, retrying", 6-i, "more times")
                 sellOrderSuccessful = false
               }
             }
             if !sellOrderSuccessful {
               fmt.Println("Sell order has failed completely, sorry,doing a market order for the rest")
-              cancelOrder(orderID, client)
+              cancelOrder(tradeID, client)
               sellMarketOrder(currency, amountToSell(currency, client), priceToSell(buyingPrices), client) //this should always go through, just in case the order is unsuccessful or only partially successful.
               //Maybe turn this into a thing that sells at a lower price and tries again
             }
 
-          }
-          else {
+          } else {
             fmt.Println("Not enough in wallet to buy with")
           }
-        }
-        else {
+        } else {
           fmt.Println("Ordersize to big or to small to sell with")
         }
       }
@@ -126,7 +120,7 @@ func amountToBuy() float32 {
   return amountToBuyWith
 }
 
-func priceToBuy(currency) float32 {
+func priceToBuy(currency string) float32 {
   var bid float32 = getBid(currency)
   var buyPrice float32
 
@@ -138,7 +132,7 @@ func shouldBuy() bool {
   return true //you should always buy, maybe write something in here later
 }
 
-func amountToSell(currency, client) float32 {
+func amountToSell(currency string, client *bitfinex.Client) float32 {
   return getWalletAmount(currency, client) //this is redundant, but whoooo thhheeee heecccckkk carrreeessss!!!!
 }
 
@@ -163,8 +157,7 @@ func priceToSell(buyingPrices [100]float32) float32 {
 func shouldSell(price float32) bool {
   if getLastPrice(currency) > price && getAsk(currency) > price {
     return true
-  }
-  else {
+  } else {
     return false
   }
 }

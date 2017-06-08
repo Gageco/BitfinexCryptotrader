@@ -1,7 +1,7 @@
 package main
 // run this program with go run *.go
 import (
-  "fmt"
+  //"fmt"
   "github.com/bitfinexcom/bitfinex-api-go/v1"
   "bufio"
   "os"
