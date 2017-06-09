@@ -3,11 +3,11 @@ package main
 import (
   "bytes"
   "encoding/json"
-  //"fmt"
+  "fmt"
   "io/ioutil"
   "net/http"
   //"time"
-  //"strconv"
+  "strconv"
   "github.com/bitfinexcom/bitfinex-api-go/v1"
   )
 /*
@@ -39,7 +39,7 @@ func checkAmount(currency string, amount float32) bool {                        
   var minAmount float32 = 0
   var maxAmount float32 = 0
 
-  responce, err = http.Get("https://api.bitfinex.com/v1/symbols_details")
+  response, err := http.Get("https://api.bitfinex.com/v1/symbols_details")
   if err !=nil {
     fmt.Println(err)
   }
@@ -53,15 +53,25 @@ func checkAmount(currency string, amount float32) bool {                        
 
   data := bytes.TrimSpace(body)
   data = bytes.TrimPrefix(data, []byte("// "))
-  err = json.Unmarshal(data & orderDetails)
+  err = json.Unmarshal(data, &orderDetails)
   if err != nil {
     fmt.Println(err)
   }
 
   for i := 0; i < len(orderDetails); i++ {
     if orderDetails[i].Symbol == currencyToCheck {
-      minAmount = orderDetails[i].MinOrder
-      maxAmount = orderDetails[i].MaxOrder
+      stringMinAmount, err := strconv.ParseFloat(orderDetails[i].MinOrder, 32)
+      if err != nil {
+        fmt.Println(err)
+      }
+      minAmount = float32(stringMinAmount)
+
+      stringMaxAmount, err := strconv.ParseFloat(orderDetails[i].MinOrder, 32)
+      if err != nil {
+        fmt.Println(err)
+      }
+      maxAmount = float32(stringMaxAmount)
+
     }
   }
 
@@ -84,7 +94,7 @@ func getWalletAmount(currency string, client *bitfinex.Client) float32 {        
 
   for i := 0; i < len(walletInfo); i++ {
     if walletInfo[i].Currency == currency {
-      value, err := str.conv.ParseFloat(walletInfo[i].Available, 32)
+      value, err := strconv.ParseFloat(walletInfo[i].Available, 32)
       if err != nil {
         fmt.Println(err)
       }
@@ -93,10 +103,11 @@ func getWalletAmount(currency string, client *bitfinex.Client) float32 {        
       return amountInWallet
     }
   }
+  return 0
 }
 
 func  orderStatus(tradeID int64, client *bitfinex.Client) bool {                            //returns true if order went through or false if order failed
-  orderStatus, err = client.Orders.Status(tradeID)
+  orderStatus, err := client.Orders.Status(tradeID)
   if err != nil {
     fmt.Println(err)
   }
@@ -114,12 +125,12 @@ func cancelOrder(tradeID int64, client *bitfinex.Client) {                      
 func checkBuyPrice(tradeID int64, client *bitfinex.Client) float32 {            //doubles checks the buying price of a trade so you know what you need to sell it at to make a profit
   var orderPrice float32
 
-  orderStatus, err = client.Orders.Status(tradeID)
+  orderStatus, err := client.Orders.Status(tradeID)
   if err != nil {
     fmt.Println(err)
   }
 
-  value, err := str.conv.ParseFloat(orderStatus.AvgExecutionPrice, 32)
+  value, err := strconv.ParseFloat(orderStatus.AvgExecutionPrice, 32)
   if err != nil {
     fmt.Println(err)
   }
@@ -127,44 +138,3 @@ func checkBuyPrice(tradeID int64, client *bitfinex.Client) float32 {            
   orderPrice = float32(value)
   return orderPrice
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//delete me

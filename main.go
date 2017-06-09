@@ -5,6 +5,7 @@ import (
   "github.com/bitfinexcom/bitfinex-api-go/v1"
   "bufio"
   "os"
+  "time"
 )
 
 
@@ -32,12 +33,12 @@ func updatePriceArray(currency string, waitTime uint8, priceArray *[100]float32)
 func main() {
   var priceArray[100]float32                                                      //to store the prices of the crypto
   var currency string = "eth"
-  var timeToWait uint8 =  1                                                       //time to wait between trades in in seconds
+  var timeToWait uint8 =  10                                                      //time to wait between trades in in seconds
   var buyingPrices[100]float32
 
   //bitfinex authenication
   inFile, _ := os.Open("./config")
-  scanner := bufio.NewsScanner(inFile)
+  scanner := bufio.NewScanner(inFile)
   scanner.Split(bufio.ScanLines)
   scanner.Scan()
   scanner.Scan()                                                                //skip first line
@@ -52,7 +53,7 @@ func main() {
 
   for i := 0; i < 10; i += 0 {
     updatePriceArray(currency, timeToWait, &priceArray)
-    //basicTrading(currency, priceArray, client, &buyingPrices)
-    //time.Sleep(time.Duration(timeToWait) * time.Minute)                       //sleep for minute after trade
+    basicTrading(currency, priceArray, client, &buyingPrices)
+    time.Sleep(time.Duration(timeToWait) * time.Minute)                       //sleep for minute after trade
   }
 }

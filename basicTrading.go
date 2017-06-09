@@ -6,7 +6,7 @@ import (
   "github.com/bitfinexcom/bitfinex-api-go/v1"
 )
 
-func basicTrade(currency string, array [100]float32, client *bitfinex.Client, buyingPrices *[100]float32) {
+func basicTrading(currency string, array [100]float32, client *bitfinex.Client, buyingPrices *[100]float32) {
   var orignialPercent float32 = .05                                               //5%
   var percentageChange float32 = .005                                           //.5%
   var numberOfPointsToLookAt int = 36                                           //36 because at 20min intervals, this is 12hrs
@@ -29,8 +29,8 @@ func basicTrade(currency string, array [100]float32, client *bitfinex.Client, bu
     */
 
     if actualPercentDifference >= neededPercent {                               //buy if positive percent meets requirements
-      var priceToBuy float32 = priceToBuy(currency)
-      var amountToBuy float32 = amountToBuy()
+      var priceToBuy float32 = funcPriceToBuy(currency)
+      var amountToBuy float32 = funcAmountToBuy(client)
       var buyOrderSuccessful bool
       if shouldBuy() { // write this <---
         if checkAmount(currency, amountToBuy) {                                   //if within limits of min and max amount that can be bought and should
@@ -70,10 +70,10 @@ func basicTrade(currency string, array [100]float32, client *bitfinex.Client, bu
         fmt.Println("You shouldnt buy at this time")
       }
     } else if actualPercentDifference <= (neededPercent*-1) {                     //sell if negative percent meets requirements
-      var priceToSell float32 = priceToSell(buyingPrices)
-      var amountToSell float32 = amountToSell(currency, client)
+      var priceToSell float32 = funcPriceToSell(*buyingPrices)
+      var amountToSell float32 = funcAmountToSell(currency, client)
       var sellOrderSuccessful bool
-      if shouldSell(priceToSell) {
+      if shouldSell(priceToSell, currency) {
         if checkAmount(currency, amountToSell) {                                  //check if its within the max and min amounts you can sell
           if getWalletAmount(currency, client) > amountToSell {                   //check you have enough that you can sell as much as you want
             tradeID = sell(currency, amountToSell, priceToSell, client)                   //sell
@@ -97,7 +97,9 @@ func basicTrade(currency string, array [100]float32, client *bitfinex.Client, bu
             if !sellOrderSuccessful {
               fmt.Println("Sell order has failed completely, sorry,doing a market order for the rest")
               cancelOrder(tradeID, client)
-              sellMarketOrder(currency, amountToSell(currency, client), priceToSell(buyingPrices), client) //this should always go through, just in case the order is unsuccessful or only partially successful.
+              xAmountToSell := funcAmountToSell(currency, client)
+              xPriceToSell := funcPriceToSell(*buyingPrices)
+              sellMarketOrder(currency, xAmountToSell, xPriceToSell, client) //this should always go through, just in case the order is unsuccessful or only partially successful.
               //Maybe turn this into a thing that sells at a lower price and tries again
             }
 
@@ -109,55 +111,5 @@ func basicTrade(currency string, array [100]float32, client *bitfinex.Client, bu
         }
       }
     }
-  }
-}
-
-func amountToBuy() float32 {
-  var amountInWallet float32 = getWalletAmount("usd", client)
-  var amountToBuyWith float32
-
-  amountToBuyWith = amountInWallet - amountInWallet *.1 //buy with only 90% of money in wallet
-  return amountToBuyWith
-}
-
-func priceToBuy(currency string) float32 {
-  var bid float32 = getBid(currency)
-  var buyPrice float32
-
-  buyPrice = bid - bid*.01 //buying price is 1% lower than the current bid, to make it more likely to go through
-  return buyPrice
-}
-
-func shouldBuy() bool {
-  return true //you should always buy, maybe write something in here later
-}
-
-func amountToSell(currency string, client *bitfinex.Client) float32 {
-  return getWalletAmount(currency, client) //this is redundant, but whoooo thhheeee heecccckkk carrreeessss!!!!
-}
-
-func priceToSell(buyingPrices [100]float32) float32 {
-  var sum float32 = 0
-  var average float32
-  var lengthOfArrayToEnd uint8
-
-  for i := 0; i < len(buyingPrices); i++ {  //get average buying price
-    sum += buyingPrices[i]
-    if buyingPrices[i] == 0 {
-      lengthOfArrayToEnd = i
-      break;
-    }
-  }
-
-  average = sum/lengthOfArrayToEnd
-  return average * 1.05 //five percent abouve the average buying price
-
-}
-
-func shouldSell(price float32) bool {
-  if getLastPrice(currency) > price && getAsk(currency) > price {
-    return true
-  } else {
-    return false
   }
 }
