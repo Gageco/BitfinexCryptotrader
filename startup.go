@@ -2,7 +2,7 @@ package main
 
 import (
   "time"
-  //"fmt"
+  "fmt"
 )
 
 func initializeArrayValues(currency string, waitTime uint8, array *[100]float32) {
@@ -12,7 +12,9 @@ func initializeArrayValues(currency string, waitTime uint8, array *[100]float32)
   for i := 0; i < lengthOfArrayToModify; i++ {
     newPrice = getLastPrice(currency)
     array[i] = newPrice
-    time.Sleep(time.Duration(waitTime) * time.Second)
+    fmt.Println("loading prices.",25-i,"more times to go.")
+    time.Sleep(time.Duration(waitTime) * time.Minute)
+
   }
 
 }

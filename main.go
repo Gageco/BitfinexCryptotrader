@@ -1,7 +1,7 @@
 package main
 // run this program with go run *.go
 import (
-  //"fmt"
+  "fmt"
   "github.com/bitfinexcom/bitfinex-api-go/v1"
   "bufio"
   "os"
@@ -48,6 +48,7 @@ func main() {
   secret := scanner.Text()                                                      //fourthline holds secret
   var client = bitfinex.NewClient().Auth(key, secret)
   inFile.Close()
+  fmt.Println("New bitfinex client successfully created")
   //initilization of junk
   initializeArrayValues(currency, timeToWait, &priceArray)                       //add 25 values to the array so that they can then be analyzed
 
