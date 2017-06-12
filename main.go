@@ -33,7 +33,7 @@ func updatePriceArray(currency string, waitTime uint8, priceArray *[100]float32)
 func main() {
   var priceArray[100]float32                                                      //to store the prices of the crypto
   var currency string = "eth"
-  var timeToWait uint8 =  10                                                      //time to wait between trades in in seconds
+  var timeToWait uint8 =  1                                                      //time to wait between trades in in seconds
   var buyingPrices[100]float32
 
   //bitfinex authenication
@@ -52,9 +52,10 @@ func main() {
   //initilization of junk
   initializeArrayValues(currency, timeToWait, &priceArray)                       //add 25 values to the array so that they can then be analyzed
 
-  for i := 0; i < 10; i += 0 {
+  for {
     updatePriceArray(currency, timeToWait, &priceArray)
     basicTrading(currency, priceArray, client, &buyingPrices)
-    time.Sleep(time.Duration(timeToWait) * time.Minute)                       //sleep for minute after trade
+    time.Sleep(time.Duration(timeToWait) * time.Minute)                         //sleep for minute after trade
+    fmt.Println("Sleeping for 10 minutes")
   }
 }

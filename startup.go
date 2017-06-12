@@ -13,7 +13,7 @@ func initializeArrayValues(currency string, waitTime uint8, array *[100]float32)
     newPrice = getLastPrice(currency)
     array[i] = newPrice
     fmt.Println("loading prices.",25-i,"more times to go.")
-    time.Sleep(time.Duration(waitTime) * time.Minute)
+    time.Sleep(time.Duration(waitTime) * time.Minute)                           //Change to minute
 
   }
 

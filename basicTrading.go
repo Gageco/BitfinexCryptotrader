@@ -110,6 +110,8 @@ func basicTrading(currency string, array [100]float32, client *bitfinex.Client, 
           fmt.Println("Ordersize to big or to small to sell with")
         }
       }
+    } else {
+      fmt.Println("No actions were taken")
     }
   }
 }
