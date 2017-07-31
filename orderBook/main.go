@@ -1,47 +1,44 @@
 package main
 
-type orderBooks []orderBook
-
-type orderBook struct {
-  Bids     []bid     `json:"bids"`
-  Asks     []ask     `json:"asks"`
-}
-
-type bid struct {
-  Price     string     `json:"price"`
-  Amount    string     `json:"amount"`
-  Time      string     `json:"timestamp"`
-}
-
-type ask struct {
-  Price     string     `json:"price"`
-  Amount    string     `json:"amount"`
-  Time      string     `json:"timestamp"`
-}
+import (
+  "bytes"
+  "encoding/json"
+  "fmt"
+  "io/ioutil"
+  "net/http"
+  "time"
+  // "github.com/wcharczuk/go-chart"
+  // "strconv"
+)
 
 func main() {
-  response, err = http.Get("https://api.bitfinex.com/v1/book/btcusd")
+  var orders orderBooks
+  // var order orderBook
+  for i := 0; i < 10; i++ {                                                     //get orderbook info 10 times in 6 sec intervals
+    fmt.Printf("Getting Orderbook Data. %d more seconds\n", (10-i)*6)
+    getMostRecentOrders(&orders[i])
+
+    time.Sleep(6 * time.Second)
+  }
+  fmt.Println(orders)
+}
+
+func getMostRecentOrders(orders *orderBook) {
+  response, err := http.Get("https://api.bitfinex.com/v1/book/btcusd")
   if err != nil {
     fmt.Println(err)
   }
   defer response.Body.Close()
-
-  // Read the data into a byte slice
-  body, err = ioutil.ReadAll(response.Body)
+  body, err := ioutil.ReadAll(response.Body)
   if err != nil {
     fmt.Println(err)
   }
-  // Remove whitespace from response
   data := bytes.TrimSpace(body)
 
-  // Remove leading slashes and blank space to get byte slice that can be unmarshaled from JSON
   data = bytes.TrimPrefix(data, []byte("// "))
 
-  // Unmarshal the JSON byte slice to a predefined struct
-  err = json.Unmarshal(data, &orderBook)
+  err = json.Unmarshal(data, &orders)
   if err != nil {
     fmt.Println(err)
-    //no idea what most of this stuff does but its important
   }
-  fmt.Println(orderBook.Bids[0])
 }
