@@ -1,6 +1,6 @@
 package main
 
-type orderBooks [10]orderBook                                                   //you can take samples 6 seconds apart 10 times
+type orderBooks [lengthOfOrderBooks]orderBook                                                   //you can take samples 6 seconds apart 10 times
 
 type orderBook struct {
   Bids     []bid     `json:"bids"`
